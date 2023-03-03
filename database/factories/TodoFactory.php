@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use App\Models\User;
+use App\Models\Todo;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class TodoFactory extends Factory
@@ -12,7 +12,7 @@ class TodoFactory extends Factory
      *
      * @var string
      */
-    protected $model = User::class;
+    protected $model = Todo::class;
 
     /**
      * Define the model's default state.
