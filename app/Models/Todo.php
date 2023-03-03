@@ -14,8 +14,10 @@ class Todo extends Model implements AuthenticatableContract, AuthorizableContrac
     use Authenticatable, Authorizable, HasFactory;
 
     protected $fillable = [
+        'title',
         'description',
         'done',
+        'done_at'
     ];
 
     protected $table = 'Todos';
