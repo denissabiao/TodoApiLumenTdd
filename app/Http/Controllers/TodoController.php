@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Todo;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class TodoController extends Controller
@@ -21,11 +22,18 @@ class TodoController extends Controller
 
     public function show($id)
     {
-        $create_todo = Todo::find($id);
-        if (!$create_todo) {
-            return response()->json(['error' => 'data not found'], 404);
+        try {
+            $create_todo = Todo::findOrFail($id);
+            if (!$create_todo) {
+                return response()->json(['error' => 'data not found'], 404);
+            }
+            return response()->json($create_todo, 200);
+        } catch (\Exception $ex) {
+            return response()->json([
+                'data' => 'not found',
+                'message' => $ex->getMessage(),
+            ], 404);
         }
-        return response()->json($create_todo, 200);
     }
 
     public function store(Request $request)
@@ -46,10 +54,17 @@ class TodoController extends Controller
             'description' => 'required',
         ]);
 
-        $todo = Todo::find($id);
-        $todo->fill($request->all());
-        $todo->save();
-        return response()->json($todo, 201);
+        try {
+            $todo = Todo::findOrFail($id);
+            $todo->fill($request->all());
+            $todo->save();
+            return response()->json($todo, 201);
+        } catch (\Exception $ex) {
+            return response()->json([
+                'data' => 'not found',
+                'message' => $ex->getMessage(),
+            ], 404);
+        }
     }
 
     public function destroy($id)
@@ -57,7 +72,6 @@ class TodoController extends Controller
 
         try {
             Todo::findOrFail($id)->delete();
-            return response()->json([], 204);
         } catch (\Exception $ex) {
             return response()->json([
                 'data' => 'not found',
@@ -65,13 +79,49 @@ class TodoController extends Controller
             ], 404);
         }
 
+        return response()->json([], 204);
+    }
 
+    public function postChangeStatusTodo($id, $status)
+    {
 
+        if (!$this->validateStatus($status)) {
+            return response()->json(['error' => 'status not available: done, undone'], 422);
+        }
 
+        try {
+            $todo = Todo::findOrFail($id);
+
+            $status == 'done' ? $this->done($todo) : $this->undone($todo);
+
+            return response()->json($todo);
+        } catch (\Exception $ex) {
+            return response()->json([
+                'data' => 'not found',
+                'message' => $ex->getMessage(),
+            ], 404);
+        }
 
     }
 
+    public function validateStatus($status)
+    {
+        return in_array($status, ['done', 'undone']);
+    }
 
+    public function done($todo)
+    {
+        $todo->done = '1';
+        $todo->done_at = Carbon::now();
+        $todo->save();
+    }
+
+    public function undone($todo)
+    {
+        $todo->done = '0';
+        $todo->done_at = null;
+        $todo->save();
+    }
 
 
 //
