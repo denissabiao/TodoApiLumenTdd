@@ -18,6 +18,7 @@ $router->get('/todo/{id}', 'TodoController@show');
 $router->post('/todo', 'TodoController@store');
 $router->put('/todo/{id}', 'TodoController@update');
 $router->delete('/todo/{id}', 'TodoController@destroy');
+$router->post('/todo/{id}/status/{status}', 'TodoController@postChangeStatusTodo');
 
 
 $router->get('/', function () use ($router) {
