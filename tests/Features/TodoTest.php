@@ -61,10 +61,10 @@ class TodoTest extends TestCase
             'description' => 'Não esquecer de lavar a entrada da casa amanhã cedo',
         ];
 
-        //action
+
         $response = $this->post('/todo', $payload);
 
-        //assert
+
         $response->seeStatusCode(201);
         $response->seeInDatabase('todos', $payload);
         $response->seeJsonStructure([
@@ -86,10 +86,10 @@ class TodoTest extends TestCase
             'description' => 'Não esquecer de lavar a entrada da casa e a varanda amanhã cedo',
         ];
 
-        //action
+
         $response = $this->put('/todo/1', $payload);
 
-        //assert
+
         $response->seeStatusCode(201);
         $response->seeJsonStructure([
             "title",
@@ -106,10 +106,10 @@ class TodoTest extends TestCase
         //prepare
         $todo = Todo::factory()->create();
 
-        //action
+
         $response = $this->delete('/todo/' . $todo->id);
 
-        //assert
+
         $this->getErrorStatus($response, 204);
         $response->seeStatusCode(204);
 
@@ -117,12 +117,23 @@ class TodoTest extends TestCase
 
     public function test_user_cant_delete_if_todo_not_exist()
     {
-        //action
+
         $response = $this->delete('/todo/fake_value');
 
-        //assert
+
         $response->seeStatusCode(404);
     }
+
+    public function test_user_can_set_status_todo_done()
+    {
+        $todo = Todo::factory()->create();
+
+        $response = $this->post('/todo/' . $todo->id . '/status/done');
+
+        $response->seeStatusCode(200);
+    }
+
+
 
 
 
