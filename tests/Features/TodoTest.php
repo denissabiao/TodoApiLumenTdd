@@ -3,8 +3,6 @@
 namespace Tests;
 
 use App\Models\Todo;
-use Laravel\Lumen\Testing\DatabaseMigrations;
-use Laravel\Lumen\Testing\DatabaseTransactions;
 
 class TodoTest extends TestCase
 {
@@ -41,29 +39,24 @@ class TodoTest extends TestCase
                 "updated_at",
             ]
         );
-
     }
 
-    public function test_user_should_receive_404_erro_when_search_something_that_dont_exist()
+    public function test_on_show_user_should_receive_404_erro_when_search_something_that_dont_exist()
     {
         $response = $this->get('/todo/554');
 
         $response->assertResponseStatus(404);
-        $response->seeJson(['error' => 'data not found']);
+        $response->seeJson(['data' => 'not found']);
     }
 
     public function test_user_can_create_todo()
     {
-
-        //prepare
         $payload = [
             'title' => 'Lavar a entrada da casa',
             'description' => 'Não esquecer de lavar a entrada da casa amanhã cedo',
         ];
 
-
         $response = $this->post('/todo', $payload);
-
 
         $response->seeStatusCode(201);
         $response->seeInDatabase('todos', $payload);
@@ -79,16 +72,12 @@ class TodoTest extends TestCase
 
     public function test_user_can_update_data_todo()
     {
-
-        //prepare
         $payload = [
             'title' => 'Lavar a entrada da casa e a varanda',
             'description' => 'Não esquecer de lavar a entrada da casa e a varanda amanhã cedo',
         ];
 
-
-        $response = $this->put('/todo/1', $payload);
-
+        $response = $this->put('/todo/2', $payload);
 
         $response->seeStatusCode(201);
         $response->seeJsonStructure([
@@ -98,28 +87,20 @@ class TodoTest extends TestCase
             "created_at",
             "id"
         ]);
-
     }
+
     public function test_user_can_delete_data_todo()
     {
-
-        //prepare
         $todo = Todo::factory()->create();
-
 
         $response = $this->delete('/todo/' . $todo->id);
 
-
-        $this->getErrorStatus($response, 204);
         $response->seeStatusCode(204);
-
     }
 
     public function test_user_cant_delete_if_todo_not_exist()
     {
-
         $response = $this->delete('/todo/fake_value');
-
 
         $response->seeStatusCode(404);
     }
@@ -133,7 +114,23 @@ class TodoTest extends TestCase
         $response->seeStatusCode(200);
     }
 
+    public function test_user_can_set_status_todo_undone()
+    {
+        $todo = Todo::factory()->create(['done' => '1']);
 
+        $response = $this->post('/todo/' . $todo->id . '/status/undone');
+
+        $response->seeStatusCode(200);
+    }
+
+    public function test_on_set_status_user_should_receive_status_422_at_change_todo_not_exist()
+    {
+        $todo = Todo::factory()->create();
+
+        $response = $this->post('/todo/' . $todo->id . '/status/fake_value');
+
+        $response->seeStatusCode(422);
+    }
 
 
 
