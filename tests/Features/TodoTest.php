@@ -3,6 +3,10 @@
 namespace Tests;
 
 use App\Models\Todo;
+use Database\Factories\TodoFactory;
+use Illuminate\Testing\Fluent\AssertableJson;
+
+
 
 class TodoTest extends TestCase
 {
@@ -51,22 +55,17 @@ class TodoTest extends TestCase
 
     public function test_user_can_create_todo()
     {
+        $todo = Todo::factory()->create();
+
         $payload = [
-            'title' => 'Lavar a entrada da casa',
-            'description' => 'Não esquecer de lavar a entrada da casa amanhã cedo',
+            'title' => $todo['title'],
+            'description' => $todo['description'],
         ];
 
         $response = $this->post('/todo', $payload);
 
         $response->seeStatusCode(201);
-        $response->seeInDatabase('todos', $payload);
-        $response->seeJsonStructure([
-            "title",
-            "description",
-            "updated_at",
-            "created_at",
-            "id"
-        ]);
+        $response->seeInDatabase('todos', $todo->toArray());
 
     }
 
@@ -131,8 +130,6 @@ class TodoTest extends TestCase
 
         $response->seeStatusCode(422);
     }
-
-
 
     private function getErrorStatus(TestCase $response, $code)
     {
